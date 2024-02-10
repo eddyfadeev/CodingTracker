@@ -1,9 +1,13 @@
-﻿namespace CodingTracker;
+﻿using CodingTracker.services;
+
+namespace CodingTracker;
 
 class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        DatabaseManager databaseManager = new();
+        
+        databaseManager.CreateDatabase();
     }
 }
