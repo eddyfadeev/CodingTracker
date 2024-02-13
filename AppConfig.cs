@@ -14,7 +14,7 @@ public class AppConfig
 
     private static void BuildConfiguration()
     {
-        var configPath = Path.Combine(Directory.GetCurrentDirectory(), "configs");
+        string configPath = Path.Combine(Directory.GetCurrentDirectory(), "configs");
         var builder = new ConfigurationBuilder()
             .SetBasePath(configPath)
             .AddJsonFile( "appsettings.json", optional: true, reloadOnChange: true);
