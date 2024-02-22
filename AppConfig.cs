@@ -21,8 +21,8 @@ internal static class AppConfig
         _configuration = builder.Build();
     }
     
-    internal static string GetConnectionString(string name = "DefaultConnection")
+    internal static string GetConnectionString()
     {
-        return _configuration.GetConnectionString(name) ?? string.Empty;
+        return _configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
     }
 }
