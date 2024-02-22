@@ -1,14 +1,15 @@
 ﻿using CodingTracker.models;
+using CodingTracker.utils;
 using Dapper;
 using Microsoft.Data.Sqlite;
 
 namespace CodingTracker.services;
 
-internal class DatabaseService
+internal partial class DatabaseService
 {
     private readonly string _connectionString = AppConfig.GetConnectionString();
 
-    internal void CreateDatabase()
+    internal void InitializeDatabase()
     {
         using var connection = GetConnection();
         
@@ -22,13 +23,18 @@ internal class DatabaseService
                                         """;
 
         connection.Execute(createTableQuery);
+        
+        #if DEBUG
+        SeedData.SeedSessions(20);
+        #endif
     }
 
-    internal List<CodingSession>? GetAllCodingSessions()
+    internal IEnumerable<CodingSession>? GetAllCodingSessions()
     {
         try
         {
             using var connection = GetConnection();
+            
             return connection.Query<CodingSession>("SELECT * FROM records").ToList();
         }
         catch (SqliteException e)
@@ -53,9 +59,25 @@ internal class DatabaseService
             return null;
         }
     }
+
+    internal void InsertRecord(CodingSession session)
+    {
+        using var connection = GetConnection(); 
+        
+        string insertQuery = """
+                             
+                                     INSERT INTO records (StartTime, EndTime, Duration)
+                                     VALUES (@StartTime, @EndTime, @Duration)
+                             """;
+        
+        connection.Execute(insertQuery, new { session.StartTime, session.EndTime, session.Duration });
+    }
     
     private SqliteConnection GetConnection()
     {
-        return new SqliteConnection(_connectionString);
+        var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        
+        return connection;
     }
 }

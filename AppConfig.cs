@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.FileProviders;
 
 namespace CodingTracker;
 
-public class AppConfig
+internal static class AppConfig
 {
     private static IConfiguration _configuration;
 
@@ -14,7 +13,7 @@ public class AppConfig
 
     private static void BuildConfiguration()
     {
-        string configPath = Path.Combine(Directory.GetCurrentDirectory(), "configs");
+        string configPath = Path.Combine(Directory.GetCurrentDirectory(), "config");
         var builder = new ConfigurationBuilder()
             .SetBasePath(configPath)
             .AddJsonFile( "appsettings.json", optional: true, reloadOnChange: true);
@@ -22,7 +21,7 @@ public class AppConfig
         _configuration = builder.Build();
     }
     
-    public static string GetConnectionString(string name = "DefaultConnection")
+    internal static string GetConnectionString(string name = "DefaultConnection")
     {
         return _configuration.GetConnectionString(name) ?? string.Empty;
     }

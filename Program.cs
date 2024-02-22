@@ -1,7 +1,7 @@
 ﻿using CodingTracker.enums;
-using CodingTracker.models;
 using CodingTracker.services;
 using CodingTracker.views;
+using Spectre.Console;
 
 namespace CodingTracker;
 
@@ -9,8 +9,29 @@ class Program
 {
     static void Main(string[] args)
     {
-        CodingSession session = new CodingSession(DateTime.Now.AddHours(-12), DateTime.Now);
+        Start();
+    }
 
-        Console.WriteLine(session.Duration.Hours);
+    private static void Start()
+    {
+        var controller = new CodingController();
+        var isRunning = true;
+
+        do
+        {
+            var userChoice = MenuView.ShowMainMenu();
+            
+            if (userChoice == MainMenuEntries.Quit)
+            {
+                isRunning = false;
+                AnsiConsole.WriteLine("Goodbye!");
+                
+                continue;
+            }
+            
+            CodingController.InvokeActionForMenuEntry(userChoice, controller);
+            
+        } while(isRunning);
+        
     }
 }

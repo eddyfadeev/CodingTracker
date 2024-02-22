@@ -1,4 +1,6 @@
-﻿using CodingTracker.enums;
+﻿using System.Collections;
+using System.ComponentModel.DataAnnotations;
+using CodingTracker.enums;
 using CodingTracker.utils;
 using Spectre.Console;
 
@@ -6,11 +8,11 @@ namespace CodingTracker.views;
 
 public static class MenuView
 {
-    internal static string? ShowMainMenu()
+    internal static MainMenuEntries? ShowMainMenu()
     {
-        var availableChoicesStrings = Utilities.GetMenuEntries(typeof(MainMenuEntries));
+        var mainMenuEntries = Utilities.GetEnumValuesAndDisplayNames<MainMenuEntries>();
         
-        if (availableChoicesStrings is null)
+        if (!mainMenuEntries.Any())
         {
             AnsiConsole.WriteLine("Problem reading main menu entries. Exiting...");
             return null;
@@ -18,10 +20,12 @@ public static class MenuView
 
         var userChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .Title("What would you like to do?")!
-                .AddChoices(availableChoicesStrings)
+                .Title("What would you like to do?")
+                .AddChoices(mainMenuEntries.Select(e => e.Value))
             );
 
-        return userChoice;
+        var selectedEntry = mainMenuEntries.SingleOrDefault(e => e.Value == userChoice);
+        
+        return selectedEntry.Key;
     }
 }

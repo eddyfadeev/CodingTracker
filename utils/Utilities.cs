@@ -8,46 +8,25 @@ namespace CodingTracker.utils;
 public static class Utilities
 {
     /// <summary>
-    /// Retrieves the display name of the specified enum value.
+    /// Gets the enum values and their display names.
     /// </summary>
-    /// <param name="enumValue">The enum to process.</param>
-    /// <returns>The display name of the enum value if it has a DisplayAttribute, otherwise the string representation of the enum value.</returns>
-    private static string? GetDisplayName(this Enum enumValue)
-    { 
-        var memberInfo = enumValue.GetType().GetMember(enumValue.ToString()).SingleOrDefault();
-        var attributes = memberInfo?.GetCustomAttributes(typeof(DisplayAttribute), false);
-
-        if (attributes is not { Length: > 0 })
-        {
-            return enumValue.ToString();
-        }
-        
-        var displayAttribute = (DisplayAttribute)attributes[0];
-            
-        return displayAttribute.Name;
-
-    }
-
-    /// <summary>
-    /// Retrieves the menu entries for the given enum value.
-    /// </summary>
-    /// <param name="enumValue">The enum to process.</param>
-    /// <returns>An array of strings representing the menu entries.</returns>
-    internal static string?[]? GetMenuEntries(Type enumValue)
+    /// <typeparam name="TEnum">The type of the enum.</typeparam>
+    /// <returns>
+    /// A collection of key-value pairs where the key is the enum value
+    /// and the value is the display name associated with the value.
+    /// </returns>
+    internal static IEnumerable<KeyValuePair<TEnum, string>>
+        GetEnumValuesAndDisplayNames<TEnum>() where TEnum : struct, Enum
     {
-        if (!enumValue.IsEnum)
-        {
-            return null;
-        }
-
-        var enumValues = Enum.GetValues(enumValue);
-        var menuEntries = new string?[enumValues.Length];
-
-        for (var i = 0; i < enumValues.Length; i++)
-        {
-            menuEntries[i] = ((Enum)enumValues.GetValue(i)).GetDisplayName();
-        }
-
-        return menuEntries;
+        return Enum.GetValues(typeof(TEnum))
+            .Cast<TEnum>()
+            .Select(enumValue => new KeyValuePair<TEnum, string>(
+                enumValue,
+                enumValue.GetType()
+                    .GetField(enumValue.ToString())
+                    ?.GetCustomAttributes(typeof(DisplayAttribute), false)
+                    .Cast<DisplayAttribute>()
+                    .FirstOrDefault()?.Name ?? enumValue.ToString()
+            ));
     }
 }

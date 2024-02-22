@@ -1,9 +1,9 @@
 ﻿namespace CodingTracker.models;
 
-internal class CodingSession(DateTime startTime, DateTime endTime)
+internal class CodingSession
 {
     internal int Id { get; set; }
-    internal DateTime StartTime { get; set; } = startTime;
-    internal DateTime EndTime { get; set; } = endTime;
+    internal DateTime StartTime { get; set; }
+    internal DateTime EndTime { get; set; }
     internal TimeSpan Duration => EndTime - StartTime;
 }
