@@ -1,13 +1,37 @@
-﻿using CodingTracker.services;
+﻿using CodingTracker.enums;
+using CodingTracker.services;
+using CodingTracker.views;
+using Spectre.Console;
 
 namespace CodingTracker;
 
-class Program
+internal static class Program
 {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
-        DatabaseManager databaseManager = new();
+        Start();
+    }
+
+    private static void Start()
+    {
+        var controller = new CodingController();
+        var isRunning = true;
+
+        do
+        {
+            var userChoice = MenuView.ShowMainMenu();
+            
+            if (userChoice == MainMenuEntries.Quit)
+            {
+                isRunning = false;
+                AnsiConsole.WriteLine("Goodbye!");
+                
+                continue;
+            }
+            
+            CodingController.InvokeActionForMenuEntry(userChoice, controller);
+            
+        } while(isRunning);
         
-        databaseManager.CreateDatabase();
     }
 }
