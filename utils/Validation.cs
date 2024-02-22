@@ -3,7 +3,7 @@ using Spectre.Console;
 
 namespace CodingTracker.utils;
 
-internal class Validation
+public class Validation
 {
     public sealed class ExitToMainMenuException(string message = "Exiting to main menu.") : Exception(message);
     internal static DateTime ValidateDate(string message = "Enter the date in the format: dd-mm-yy hh:mm (24h clock).")

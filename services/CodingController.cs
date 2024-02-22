@@ -7,7 +7,8 @@ namespace CodingTracker.services;
 
 internal class CodingController : ServiceHelpers
 {
-    private DatabaseService _databaseService = new DatabaseService();
+    private readonly DatabaseService _databaseService = new DatabaseService();
+    
     public CodingController()
     {
         _databaseService.InitializeDatabase();
