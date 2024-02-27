@@ -1,13 +1,16 @@
-﻿using CodingTracker.models;
+﻿using static CodingTracker.utils.Validation;
+
+using CodingTracker.models;
 using CodingTracker.utils;
 using CodingTracker.views;
 using Spectre.Console;
+
 
 namespace CodingTracker.services;
 
 internal class CodingController : ServiceHelpers
 {
-    private readonly DatabaseService _databaseService = new DatabaseService();
+    private readonly DatabaseService _databaseService = new ();
     
     public CodingController()
     {
@@ -27,13 +30,25 @@ internal class CodingController : ServiceHelpers
         _databaseService.InsertRecord(session);
     }
     
-    internal void ViewRecords()
+    private void ViewRecords()
     {
         var tableConstructor = new SummaryConstructor();
         var records = _databaseService.GetAllCodingSessions();
-        var table = tableConstructor.ShowAllRecords(records);
         
-        AnsiConsole.Write(table);
+        if (records is null)
+        {
+            AnsiConsole.WriteLine("No records found.");
+        }
+        else
+        {
+            var codingSessions = records.ToList();
+        
+            var table = tableConstructor.ShowAllRecords(codingSessions);
+        
+            AnsiConsole.Write(table);
+        }
+        
+        ContinueMessage();
     }
     
     internal void DeleteRecord()
@@ -43,11 +58,55 @@ internal class CodingController : ServiceHelpers
     
     internal void UpdateRecord()
     {
-        // TODO: Implement AddRecord
+        var userInput = new UserInput();
+        CodingSession session;
+        DateTime[] dates;
+        
+        var sessions = _databaseService.GetAllCodingSessions();
+        
+        if (sessions is null)
+        {
+            ContinueMessage();
+            
+            return;
+        }
+        
+        try
+        {
+            var id = userInput.GetIdInput();
+            
+            session = sessions.Single(x => x.Id == id);
+            
+            dates = userInput.GetDateInputs();
+        }
+        catch (InvalidOperationException)
+        {
+            AnsiConsole.WriteLine("No record with that ID exists.");
+            ContinueMessage();
+
+            return;
+        }
+        catch (ExitToMainMenuException)
+        {
+            ContinueMessage();
+            
+            return;
+        }
+        
+        session.StartTime = dates[0];
+        session.EndTime = dates[1];
+        
+        _databaseService.UpdateRecord(session);
     }
     
     internal void CreateReport()
     {
         // TODO: Implement AddRecord
+    }
+
+    private void ContinueMessage()
+    {
+        AnsiConsole.WriteLine("Press any key to continue...\n");
+        Console.ReadKey();
     }
 }

@@ -66,11 +66,24 @@ internal partial class DatabaseService
         
         string insertQuery = """
                              
-                                     INSERT INTO records (StartTime, EndTime, Duration)
-                                     VALUES (@StartTime, @EndTime, @Duration)
+                                INSERT INTO records (StartTime, EndTime, Duration)
+                                VALUES (@StartTime, @EndTime, @Duration)
                              """;
         
         connection.Execute(insertQuery, new { session.StartTime, session.EndTime, session.Duration });
+    }
+
+    internal void UpdateRecord(CodingSession session)
+    {
+        using var connection = GetConnection();
+        
+        string query = """
+                            UPDATE records
+                            SET StartTime = @StartTime, EndTime = @EndTime, Duration = @Duration
+                            WHERE Id = @Id
+                        """;
+        
+        connection.Execute(query, new { session.StartTime, session.EndTime, session.Duration, session.Id });
     }
     
     private SqliteConnection GetConnection()
