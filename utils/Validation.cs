@@ -5,7 +5,7 @@ namespace CodingTracker.utils;
 
 public static class Validation
 {
-    public sealed class ExitToMainMenuException(string message = "Exiting to main menu.") : Exception(message);
+    public sealed class ExitToMainMenuException(string message = "\nExiting to main menu.") : Exception(message);
     
     internal static DateTime ValidateDate(string message = "Enter the date in the format: dd-mm-yy hh:mm (24h clock).")
     {
@@ -18,9 +18,9 @@ public static class Validation
 
             try
             {
-                if (string.IsNullOrWhiteSpace(input))
+                if (!string.IsNullOrWhiteSpace(input))
                 {
-                    ExitToMainMenu(input);
+                    CheckForZero(input);
                 }
 
             }
@@ -49,7 +49,41 @@ public static class Validation
         return dateValue;
     }
 
-    private static void ExitToMainMenu(string input)
+    internal static uint ValidateNumber(string message = "Enter a positive number.")
+    {
+        uint number;
+        bool isValid;
+
+        do
+        {
+            var input = AnsiConsole.Ask<string>(message);
+
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(input))
+                {
+                    CheckForZero(input);
+                }
+            }
+            catch (ExitToMainMenuException e)
+            {
+                AnsiConsole.WriteLine(e.Message);
+                throw;
+            }
+            
+            isValid = uint.TryParse(input, out number);
+            
+            if (!isValid)
+            {
+                AnsiConsole.WriteLine("Invalid input. Please enter a positive number or 0 to exit to main menu.");
+            }
+            
+        } while(!isValid);
+
+        return number;
+    }
+
+    private static void CheckForZero(string input)
     {
         if (input.Equals("0"))
         {

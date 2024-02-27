@@ -1,5 +1,6 @@
 ﻿using Spectre.Console;
 using static CodingTracker.utils.Validation;
+
 namespace CodingTracker.utils;
 
 public class UserInput
@@ -19,5 +20,12 @@ public class UserInput
         }
 
         return [startDate, endDate];
+    }
+
+    internal int GetIdInput()
+    {
+        var id = ValidateNumber("Enter the ID of the record you want to update or delete.");
+        
+        return (int)id;
     }
 }

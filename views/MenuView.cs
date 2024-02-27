@@ -10,6 +10,8 @@ public static class MenuView
 {
     internal static MainMenuEntries? ShowMainMenu()
     {
+        Console.Clear();
+        
         var mainMenuEntries = Utilities.GetEnumValuesAndDisplayNames<MainMenuEntries>();
         
         if (!mainMenuEntries.Any())
