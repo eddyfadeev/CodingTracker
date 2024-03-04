@@ -6,7 +6,7 @@ namespace CodingTracker.views;
 
 public class SummaryConstructor
 {
-    internal Table ShowAllRecords(IEnumerable<CodingSession> sessions)
+    internal Table ShowRecords(IEnumerable<CodingSession> sessions)
     {
         Table table = new()
         {
@@ -22,7 +22,8 @@ public class SummaryConstructor
         {
             table.AddRow(
                 session.Id.ToString(),
-                session.StartTime.ToString(CultureInfo.InvariantCulture), session.EndTime.ToString(CultureInfo.InvariantCulture),
+                session.StartTime.ToString(CultureInfo.InvariantCulture), 
+                session.EndTime.ToString(CultureInfo.InvariantCulture),
                 session.Duration.ToString()
                 );
         }

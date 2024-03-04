@@ -5,10 +5,13 @@ using CodingTracker.utils;
 using CodingTracker.views;
 using Spectre.Console;
 
-
 namespace CodingTracker.services;
 
-internal class CodingController : ServiceHelpers
+/// <summary>
+/// This class initializes the database and handles the user's input for CRUD operations. Methods are invoked with
+/// reflection, based on the method name passed as custom attribute above corresponding enum entry.
+/// </summary>
+internal class CodingController 
 {
     private readonly DatabaseService _databaseService = new ();
     
@@ -43,7 +46,7 @@ internal class CodingController : ServiceHelpers
         {
             var codingSessions = records.ToList();
         
-            var table = tableConstructor.ShowAllRecords(codingSessions);
+            var table = tableConstructor.ShowRecords(codingSessions);
         
             AnsiConsole.Write(table);
         }
@@ -55,7 +58,6 @@ internal class CodingController : ServiceHelpers
     {
         var userInput = new UserInput();
         var databaseService = new DatabaseService();
-        var sessions = databaseService.GetAllCodingSessions();
         
         ViewRecords();
 
@@ -116,11 +118,6 @@ internal class CodingController : ServiceHelpers
         session.EndTime = dates[1];
         
         _databaseService.UpdateRecord(session);
-    }
-    
-    internal void CreateReport()
-    {
-        // TODO: Implement AddRecord
     }
 
     private void ContinueMessage()
