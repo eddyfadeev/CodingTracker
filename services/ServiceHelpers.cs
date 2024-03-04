@@ -6,14 +6,14 @@ namespace CodingTracker.services;
 
 internal abstract class ServiceHelpers
 {
-    internal static void InvokeActionForMenuEntry(Enum entry, CodingController actionInstance)
+    internal static void InvokeActionForMenuEntry(Enum entry, object actionInstance)
     {
         var entryFieldInfo = entry.GetType().GetField(entry.ToString());
         var methodAttribute = entryFieldInfo.GetCustomAttribute<EnumHelpers.MethodAttribute>();
 
         if (methodAttribute != null)
         {
-            var method = typeof(CodingController).GetMethod(
+            var method = actionInstance.GetType().GetMethod(
                 methodAttribute.MethodName, 
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
             );

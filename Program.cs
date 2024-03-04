@@ -28,10 +28,35 @@ internal static class Program
                 
                 continue;
             }
+
+            if (userChoice == MainMenuEntries.Reports)
+            {
+                OpenReportsMenu();
+                continue;
+            }
             
-            CodingController.InvokeActionForMenuEntry(userChoice, controller);
+            ServiceHelpers.InvokeActionForMenuEntry(userChoice, controller);
             
         } while(isRunning);
-        
+    }
+
+    private static void OpenReportsMenu()
+    {
+        var reportsService = new ReportService();
+        var isRunning = true;
+
+        do
+        {
+            var userChoice = ReportsMenuView.ShowReportsMenu();
+
+            if (userChoice == ReportTypes.BackToMainMenu)
+            {
+                isRunning = false;
+                continue;
+            }
+            
+            ServiceHelpers.InvokeActionForMenuEntry(userChoice, reportsService);
+            
+        } while (isRunning);
     }
 }

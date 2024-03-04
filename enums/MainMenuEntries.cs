@@ -16,8 +16,8 @@ internal enum MainMenuEntries
     [Display(Name = "Update Record"), EnumHelpers.Method("UpdateRecord")]
     UpdateRecord,
     
-    [Display(Name = "Create Report"), EnumHelpers.Method("CreateReport")]
-    CreateReport,
+    [Display(Name = "Reports")]
+    Reports,
     
     Quit
 }

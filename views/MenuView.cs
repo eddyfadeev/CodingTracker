@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.ComponentModel.DataAnnotations;
-using CodingTracker.enums;
+﻿using CodingTracker.enums;
 using CodingTracker.utils;
 using Spectre.Console;
 
