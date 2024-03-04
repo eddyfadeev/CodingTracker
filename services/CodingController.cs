@@ -53,7 +53,26 @@ internal class CodingController : ServiceHelpers
     
     internal void DeleteRecord()
     {
-        // TODO: Implement AddRecord
+        var userInput = new UserInput();
+        var databaseService = new DatabaseService();
+        var sessions = databaseService.GetAllCodingSessions();
+        
+        ViewRecords();
+
+        var id = userInput.GetIdInput();
+
+        if (!AnsiConsole.Confirm("Are you sure?"))
+        {
+            return;
+        }
+
+        var response = databaseService.DeleteRecord(id);
+        
+        var responseMessage = response < 1 ? "No record with that ID exists." : "Record deleted successfully.";
+        
+        AnsiConsole.WriteLine(responseMessage);
+        
+        ContinueMessage();
     }
     
     internal void UpdateRecord()

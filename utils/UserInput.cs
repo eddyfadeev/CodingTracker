@@ -24,7 +24,7 @@ public class UserInput
 
     internal int GetIdInput()
     {
-        var id = ValidateNumber("Enter the ID of the record you want to update or delete.");
+        var id = ValidateNumber("Enter the ID of the record.");
         
         return (int)id;
     }
