@@ -4,7 +4,7 @@ using Spectre.Console;
 
 namespace CodingTracker.views;
 
-public class ReportsMenuView
+public static class ReportsMenuView
 {
     internal static ReportTypes? ShowReportsMenu()
     {
