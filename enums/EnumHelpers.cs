@@ -1,6 +1,6 @@
 ﻿namespace CodingTracker.enums;
 
-public class EnumHelpers
+public static class EnumHelpers
 {
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class MethodAttribute(string methodName) : Attribute
