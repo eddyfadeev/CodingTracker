@@ -1,4 +1,5 @@
 ﻿using static CodingTracker.utils.Validation;
+using static CodingTracker.utils.Utilities;
 
 using CodingTracker.models;
 using CodingTracker.utils;
@@ -11,14 +12,9 @@ namespace CodingTracker.services;
 /// This class initializes the database and handles the user's input for CRUD operations. Methods are invoked with
 /// reflection, based on the method name passed as custom attribute above corresponding enum entry.
 /// </summary>
-internal class CodingController 
+internal class CodingController(DatabaseService databaseService) 
 {
-    private readonly DatabaseService _databaseService = new ();
-    
-    public CodingController()
-    {
-        _databaseService.InitializeDatabase();
-    }
+    private readonly DatabaseService _databaseService = databaseService;
 
     internal void AddRecord()
     {
@@ -45,10 +41,9 @@ internal class CodingController
         else
         {
             var codingSessions = records.ToList();
+            tableConstructor.PopulateWithRecords(codingSessions);
         
-            var table = tableConstructor.ShowRecords(codingSessions);
-        
-            AnsiConsole.Write(table);
+            AnsiConsole.Write(tableConstructor.SummaryTable);
         }
         
         ContinueMessage();
@@ -57,7 +52,6 @@ internal class CodingController
     internal void DeleteRecord()
     {
         var userInput = new UserInput();
-        var databaseService = new DatabaseService();
         
         ViewRecords();
 
@@ -68,7 +62,7 @@ internal class CodingController
             return;
         }
 
-        var response = databaseService.DeleteRecord(id);
+        var response = _databaseService.DeleteRecord(id);
         
         var responseMessage = response < 1 ? "No record with that ID exists." : "Record deleted successfully.";
         
@@ -118,11 +112,5 @@ internal class CodingController
         session.EndTime = dates[1];
         
         _databaseService.UpdateRecord(session);
-    }
-
-    private void ContinueMessage()
-    {
-        AnsiConsole.WriteLine("Press any key to continue...\n");
-        Console.ReadKey();
     }
 }

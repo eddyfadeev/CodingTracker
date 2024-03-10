@@ -36,9 +36,8 @@ internal partial class DatabaseService
 
         connection.Execute(createTableQuery);
         
-        #if DEBUG
-        SeedData.SeedSessions(20);
-        #endif
+        
+        //SeedData.SeedSessions(100);
     }
 
     /// <summary>
@@ -67,8 +66,8 @@ internal partial class DatabaseService
     /// </summary>
     /// <param name="start">The start date and time of the range.</param>
     /// <param name="end">The end date and time of the range.</param>
-    /// <returns>A list of coding sessions that fall within the specified date range.</returns>
-    internal List<CodingSession>? GetCodingSessionsByDate(DateTime start, DateTime end)
+    /// <returns>An IEnumerable of coding sessions that fall within the specified date range.</returns>
+    internal IEnumerable<CodingSession>? GetCodingSessionsByDate(DateTime start, DateTime end)
     {
         try
         {

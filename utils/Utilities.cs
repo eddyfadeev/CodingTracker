@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Spectre.Console;
 
 namespace CodingTracker.utils;
 
@@ -28,5 +29,11 @@ public static class Utilities
                     .Cast<DisplayAttribute>()
                     .FirstOrDefault()?.Name ?? enumValue.ToString()
             ));
+    }
+    
+    internal static void ContinueMessage()
+    {
+        AnsiConsole.WriteLine("Press any key to continue...\n");
+        Console.ReadKey();
     }
 }

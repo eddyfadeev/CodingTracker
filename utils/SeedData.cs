@@ -9,22 +9,27 @@ internal static class SeedData
     {
         Random random = new();
         DateTime currentDate = DateTime.Now.Date;
+        List<Tuple<DateTime, DateTime>> dateRanges = new();
         
         List<CodingSession> sessions = new();
 
         for (int i = 1; i <= count; i++)
         {
-            DateTime startDate = currentDate.AddHours(random.Next(13));
+            DateTime startDate = currentDate.AddDays(-random.Next(365)).AddHours(-random.Next(13));
             DateTime endDate = startDate.AddHours(random.Next(13));
             
+            dateRanges.Add(new Tuple<DateTime, DateTime>(startDate, endDate));
+        }
+        dateRanges.Sort((x, y) => x.Item1.CompareTo(y.Item1));
+
+        for (int i = 0; i < count; i++)
+        {
             sessions.Add(new CodingSession
             {
-                Id = 1,
-                StartTime = startDate,
-                EndTime = endDate
+                Id = i,
+                StartTime = dateRanges[i].Item1,
+                EndTime = dateRanges[i].Item2,
             });
-            
-            currentDate = currentDate.AddDays(1);
         }
         
         var databaseService = new DatabaseService();

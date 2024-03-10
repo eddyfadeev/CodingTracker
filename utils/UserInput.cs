@@ -5,10 +5,15 @@ namespace CodingTracker.utils;
 
 public class UserInput
 {
-    internal DateTime[] GetDateInputs()
+    internal DateTime[] GetDateInputs(bool singleDate = false)
     {
         AnsiConsole.WriteLine("Please enter a start date.");
         var startDate = ValidateDate();
+        
+        if (singleDate)
+        {
+            return [startDate];
+        }
         
         AnsiConsole.WriteLine("Please enter an end date.");
         var endDate = ValidateDate();
