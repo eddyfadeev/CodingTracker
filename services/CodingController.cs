@@ -23,13 +23,14 @@ internal class CodingController(DatabaseService databaseService)
 
         var dates = userInput.GetDateInputs();
         
+        
         session.StartTime = dates[0];
         session.EndTime = dates[1];
         
         _databaseService.InsertRecord(session);
     }
     
-    private void ViewRecords()
+    internal Table? ViewRecords()
     {
         var tableConstructor = new SummaryConstructor();
         var records = _databaseService.GetAllCodingSessions();
@@ -37,6 +38,7 @@ internal class CodingController(DatabaseService databaseService)
         if (records is null)
         {
             AnsiConsole.WriteLine("No records found.");
+            return null;
         }
         else
         {
@@ -47,6 +49,8 @@ internal class CodingController(DatabaseService databaseService)
         }
         
         ContinueMessage();
+
+        return tableConstructor.SummaryTable;
     }
     
     internal void DeleteRecord()

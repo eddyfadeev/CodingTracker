@@ -1,7 +1,5 @@
-﻿using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using CodingTracker.models;
-using Microsoft.Extensions.Primitives;
 using Spectre.Console;
 
 namespace CodingTracker.views;
@@ -60,7 +58,11 @@ public class SummaryConstructor
         string FormatUnit(string unit, int value) => value == 1 ? unit : unit + "s";
 
         return stringBuilder
-            .Append((_totalDuration.Days > 0 ? _totalDuration.Days + " " + FormatUnit("day", _totalDuration.Days) + ", " : ""))
+            .Append(
+                (_totalDuration.Days > 0 ? 
+                _totalDuration.Days + " " + FormatUnit("day", _totalDuration.Days) + ", " : 
+                "")
+                )
             .Append(_totalDuration.Hours + " " + FormatUnit("hour", _totalDuration.Hours) + ", ")
             .Append(_totalDuration.Minutes + " " + FormatUnit("minute", _totalDuration.Minutes))
             .ToString();
