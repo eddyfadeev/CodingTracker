@@ -49,7 +49,7 @@ public static class Validation
         return dateValue;
     }
 
-    internal static uint ValidateNumber(string message = "Enter a positive number.")
+    internal static uint ValidateNumber(string message = "Enter a positive number.", uint topLimit = uint.MaxValue, uint bottomLimit = 0)
     {
         uint number;
         bool isValid;
@@ -71,7 +71,7 @@ public static class Validation
                 throw;
             }
             
-            isValid = uint.TryParse(input, out number);
+            isValid = uint.TryParse(input, out number) && number <= topLimit && number >= bottomLimit;
             
             if (!isValid)
             {

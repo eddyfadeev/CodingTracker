@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using CodingTracker.models;
+using Spectre.Console;
 
 namespace CodingTracker.utils;
 
@@ -28,5 +30,23 @@ public static class Utilities
                     .Cast<DisplayAttribute>()
                     .FirstOrDefault()?.Name ?? enumValue.ToString()
             ));
+    }
+    
+    internal static void ContinueMessage()
+    {
+        AnsiConsole.WriteLine("Press any key to continue...\n");
+        Console.ReadKey();
+    }
+
+    internal static List<CodingSession> CheckForAnyRecord(IEnumerable<CodingSession> records)
+    {
+        if (records is null)
+        {
+            AnsiConsole.WriteLine("No records found.");
+            
+            return new List<CodingSession>();
+        }
+
+        return records.ToList();
     }
 }

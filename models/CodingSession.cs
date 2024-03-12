@@ -1,6 +1,6 @@
 ﻿namespace CodingTracker.models;
 
-internal class CodingSession
+internal record CodingSession
 {
     internal int Id { get; set; }
     internal DateTime StartTime { get; set; }

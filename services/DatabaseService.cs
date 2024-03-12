@@ -1,5 +1,4 @@
 ﻿using CodingTracker.models;
-using CodingTracker.utils;
 using Dapper;
 using Microsoft.Data.Sqlite;
 
@@ -37,7 +36,7 @@ internal partial class DatabaseService
         connection.Execute(createTableQuery);
         
         #if DEBUG
-        SeedData.SeedSessions(20);
+        //SeedData.SeedSessions(100);
         #endif
     }
 
@@ -67,8 +66,8 @@ internal partial class DatabaseService
     /// </summary>
     /// <param name="start">The start date and time of the range.</param>
     /// <param name="end">The end date and time of the range.</param>
-    /// <returns>A list of coding sessions that fall within the specified date range.</returns>
-    internal List<CodingSession>? GetCodingSessionsByDate(DateTime start, DateTime end)
+    /// <returns>An IEnumerable of coding sessions that fall within the specified date range.</returns>
+    internal IEnumerable<CodingSession>? GetCodingSessionsByDate(DateTime start, DateTime end)
     {
         try
         {
@@ -88,7 +87,7 @@ internal partial class DatabaseService
     /// Inserts a coding session record into the database.
     /// </summary>
     /// <param name="session">The coding session to be inserted.</param>
-    internal void InsertRecord(CodingSession session)
+    internal int InsertRecord(CodingSession session)
     {
         using var connection = GetConnection(); 
         
@@ -98,7 +97,7 @@ internal partial class DatabaseService
                                 VALUES (@StartTime, @EndTime, @Duration)
                              """;
         
-        connection.Execute(insertQuery, new { session.StartTime, session.EndTime, session.Duration });
+        return connection.Execute(insertQuery, new { session.StartTime, session.EndTime, session.Duration });
     }
 
     /// <summary>
@@ -130,6 +129,13 @@ internal partial class DatabaseService
         string query = "DELETE FROM records WHERE Id = @Id";
         
         return connection.Execute(query, new { Id = recordId });
+    }
+    
+    internal CodingSession GetLastRecord()
+    {
+        using var connection = GetConnection();
+        
+        return connection.QueryFirstOrDefault<CodingSession>("SELECT * FROM records ORDER BY Id DESC LIMIT 1");
     }
 
     /// <summary>
