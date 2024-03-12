@@ -40,6 +40,11 @@ internal static class Program
                 OpenReportsMenu();
                 continue;
             }
+
+            if (userChoice == MainMenuEntries.Timer)
+            {
+                OpenTimerMenu();
+            }
             
             ServiceHelpers.InvokeActionForMenuEntry(userChoice, controller);
             
@@ -53,7 +58,7 @@ internal static class Program
 
         do
         {
-            var userChoice = ReportsMenuView.ShowReportsMenu();
+            var userChoice = MenuView.ShowReportsMenu();
 
             if (userChoice == ReportTypes.BackToMainMenu)
             {
@@ -63,6 +68,25 @@ internal static class Program
             
             ServiceHelpers.InvokeActionForMenuEntry(userChoice, reportsService);
             
+        } while (isRunning);
+    }
+
+    private static void OpenTimerMenu()
+    {
+        var timerService = new TimerService(_databaseService);
+        var isRunning = true;
+
+        do
+        {
+            var userChoice = MenuView.ShowTimerMenu();
+            
+            if (userChoice == TimerMenuEntries.BackToMainMenu)
+            {
+                isRunning = false;
+                continue;
+            }
+            
+            ServiceHelpers.InvokeActionForMenuEntry(userChoice, timerService);
         } while (isRunning);
     }
 }

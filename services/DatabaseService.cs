@@ -1,5 +1,4 @@
 ﻿using CodingTracker.models;
-using CodingTracker.utils;
 using Dapper;
 using Microsoft.Data.Sqlite;
 
@@ -87,7 +86,7 @@ internal partial class DatabaseService
     /// Inserts a coding session record into the database.
     /// </summary>
     /// <param name="session">The coding session to be inserted.</param>
-    internal void InsertRecord(CodingSession session)
+    internal int InsertRecord(CodingSession session)
     {
         using var connection = GetConnection(); 
         
@@ -97,7 +96,7 @@ internal partial class DatabaseService
                                 VALUES (@StartTime, @EndTime, @Duration)
                              """;
         
-        connection.Execute(insertQuery, new { session.StartTime, session.EndTime, session.Duration });
+        return connection.Execute(insertQuery, new { session.StartTime, session.EndTime, session.Duration });
     }
 
     /// <summary>
@@ -129,6 +128,13 @@ internal partial class DatabaseService
         string query = "DELETE FROM records WHERE Id = @Id";
         
         return connection.Execute(query, new { Id = recordId });
+    }
+    
+    internal CodingSession GetLastRecord()
+    {
+        using var connection = GetConnection();
+        
+        return connection.QueryFirstOrDefault<CodingSession>("SELECT * FROM records ORDER BY Id DESC LIMIT 1");
     }
 
     /// <summary>

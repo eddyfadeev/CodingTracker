@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using CodingTracker.models;
 using Spectre.Console;
 
@@ -34,9 +35,9 @@ public class SummaryConstructor
 
             table.AddRow(
                 new Markup($"[{color}]{session.Id}[/]"),
-                new Markup($"[{color}]{session.StartTime}[/]"),
-                new Markup($"[{color}]{session.EndTime}[/]"),
-                new Markup($"[{color}]{session.Duration}[/]")
+                new Markup($"[{color}]{session.StartTime:dd-MM-yyyy HH:mm}[/]"),
+                new Markup($"[{color}]{session.EndTime:dd-MM-yyyy HH:mm}[/]"),
+                new Markup($"[{color}]{session.Duration:g}[/]")
                 );
             counter++;
 

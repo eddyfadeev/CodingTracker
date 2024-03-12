@@ -1,19 +1,23 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using static CodingTracker.enums.EnumHelpers;
 
 namespace CodingTracker.enums;
 
 internal enum MainMenuEntries
 {
-    [Display(Name = "Add record"), EnumHelpers.Method("AddRecord")]
+    [Display(Name = "Timer")]
+    Timer,
+    
+    [Display(Name = "Add record"), Method("AddRecord")]
     AddRecord,
     
-    [Display(Name = "View Records"), EnumHelpers.Method("ViewRecords")]
+    [Display(Name = "View Records"), Method("ViewRecords")]
     ViewRecords,
     
-    [Display(Name = "Delete Record"), EnumHelpers.Method("DeleteRecord")]
+    [Display(Name = "Delete Record"), Method("DeleteRecord")]
     DeleteRecord,
     
-    [Display(Name = "Update Record"), EnumHelpers.Method("UpdateRecord")]
+    [Display(Name = "Update Record"), Method("UpdateRecord")]
     UpdateRecord,
     
     [Display(Name = "Reports")]
