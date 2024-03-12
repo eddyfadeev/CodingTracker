@@ -35,8 +35,9 @@ internal partial class DatabaseService
 
         connection.Execute(createTableQuery);
         
-        
+        #if DEBUG
         //SeedData.SeedSessions(100);
+        #endif
     }
 
     /// <summary>
