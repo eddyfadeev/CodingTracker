@@ -1,4 +1,5 @@
-﻿using static CodingTracker.utils.Validation;
+﻿using CodingTracker.enums;
+using static CodingTracker.utils.Validation;
 using static CodingTracker.utils.Utilities;
 
 using CodingTracker.models;
@@ -16,12 +17,18 @@ internal class CodingController(DatabaseService databaseService)
 {
     private readonly DatabaseService _databaseService = databaseService;
 
+    /// <summary>
+    /// Displays the records of coding sessions in the console.
+    /// </summary>
     internal void ViewRecords()
     {
         AnsiConsole.Write(PrepareRecords().summaryForRender);
         ContinueMessage();
     }
 
+    /// <summary>
+    /// Adds a record to the database based on the user's input for a coding session.
+    /// </summary>
     internal void AddRecord()
     {
         CodingSession session = new();
@@ -41,13 +48,23 @@ internal class CodingController(DatabaseService databaseService)
         session.StartTime = dates[0];
         session.EndTime = dates[1];
         
-        _databaseService.InsertRecord(session);
+        _databaseService.UpdateData(
+            action:DatabaseUpdateActions.Insert,
+            session:session
+            );
     }
-    
+
+    /// <summary>
+    /// Prepares and retrieves coding session records for display or saving.
+    /// </summary>
+    /// <returns>
+    /// A tuple containing the summary table for display purposes and the summary table for saving purposes.
+    /// If no records are found, both tables will be null.
+    /// </returns>
     internal (Table? summaryForRender, Table? summaryForSave) PrepareRecords()
     {
         var tableConstructor = new SummaryConstructor();
-        var records = _databaseService.GetAllCodingSessions();
+        var records = _databaseService.RetrieveCodingSessions(null, null);
         
         if (records is null)
         {
@@ -62,7 +79,10 @@ internal class CodingController(DatabaseService databaseService)
 
         return (tableConstructor.SummaryTable, tableConstructor.SummaryTableForSaving);
     }
-    
+
+    /// <summary>
+    /// Deletes a record from the database based on the provided record ID.
+    /// </summary>
     internal void DeleteRecord()
     {
         int id;
@@ -86,7 +106,10 @@ internal class CodingController(DatabaseService databaseService)
             return;
         }
 
-        var response = _databaseService.DeleteRecord(id);
+        var response = _databaseService.UpdateData(
+            action:DatabaseUpdateActions.Delete, 
+            recordId:id
+            );
         
         var responseMessage = response < 1 ? "No record with that ID exists." : "Record deleted successfully.";
         
@@ -94,7 +117,10 @@ internal class CodingController(DatabaseService databaseService)
         
         ContinueMessage();
     }
-    
+
+    /// <summary>
+    /// Updates a record in the database with the specified ID by modifying the start and end times of a coding session.
+    /// </summary>
     internal void UpdateRecord()
     {
         var userInput = new UserInput();
@@ -102,7 +128,7 @@ internal class CodingController(DatabaseService databaseService)
         int id;
         CodingSession session;
         
-        var sessions = _databaseService.GetAllCodingSessions();
+        var sessions = _databaseService.RetrieveCodingSessions(null, null);
         
         if (sessions is null)
         {
@@ -137,9 +163,12 @@ internal class CodingController(DatabaseService databaseService)
         session.StartTime = dates[0];
         session.EndTime = dates[1];
         
-        _databaseService.UpdateRecord(session);
+        _databaseService.UpdateData(
+            action:DatabaseUpdateActions.Update, 
+            session:session
+            );
         
-        AnsiConsole.WriteLine("Record deleted successfully.");
+        AnsiConsole.WriteLine("Record updated successfully.");
         ContinueMessage();
     }
 }

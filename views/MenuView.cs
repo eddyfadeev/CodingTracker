@@ -4,6 +4,9 @@ using Spectre.Console;
 
 namespace CodingTracker.views;
 
+/// <summary>
+/// Provides static methods for displaying menu options to the user.
+/// </summary>
 public static class MenuView
 {
     internal static MainMenuEntries? ShowMainMenu()
@@ -26,7 +29,13 @@ public static class MenuView
         
         return ShowMenuPrompt(timerMenuEntries);
     }
-    
+
+    /// <summary>
+    /// Prompts the user to select an entry from the menu and returns the selected entry.
+    /// </summary>
+    /// <typeparam name="TEnum">The enum type of menu entries.</typeparam>
+    /// <param name="menuEntries">The collection of menu entries with their display names.</param>
+    /// <returns>The selected menu entry or null if there are no menu entries or an error occurred.</returns>
     private static TEnum? ShowMenuPrompt<TEnum>(
         IEnumerable<KeyValuePair<TEnum, string>> menuEntries) where TEnum : struct, Enum
     {

@@ -5,13 +5,21 @@ using Spectre.Console;
 
 namespace CodingTracker.views;
 
+/// <summary>
+/// Represents a class for constructing summary tables for coding sessions.
+/// </summary>
 public class SummaryConstructor
 {
     internal Table SummaryTable = new();
     internal Table SummaryTableForSaving = new();
     private TimeSpan _totalDuration;
     internal string FormattedDuration = "";
-    
+
+    /// <summary>
+    /// Populates a table with coding session records.
+    /// </summary>
+    /// <param name="sessions">The list of coding sessions to populate the table with.</param>
+    /// <param name="formatForSaving">Indicates whether the table should be formatted for saving or not. Defaults to false.</param>
     internal void PopulateWithRecords(IEnumerable<CodingSession> sessions, bool formatForSaving = false)
     {
         Table table = new()
@@ -70,7 +78,10 @@ public class SummaryConstructor
         SummaryTableForSaving = tableForSaving;
         SummaryTable = table;
     }
-    
+
+    /// <summary>
+    /// Formats the total duration of coding sessions.
+    /// </summary>
     private void FormatDuration()
     {
         var stringBuilder = new StringBuilder();
