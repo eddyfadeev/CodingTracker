@@ -7,10 +7,10 @@ namespace CodingTracker;
 
 internal static class Program
 {
-    private static readonly DatabaseService _databaseService = new();
+    private static readonly DatabaseService DatabaseService = new();
     static Program()
     {
-        _databaseService.InitializeDatabase();
+        DatabaseService.InitializeDatabase();
     }
     
     private static void Main(string[] args)
@@ -20,7 +20,7 @@ internal static class Program
 
     private static void Start()
     {
-        var controller = new CodingController(_databaseService);
+        var controller = new CodingController(DatabaseService);
         var isRunning = true;
 
         do
@@ -53,7 +53,7 @@ internal static class Program
 
     private static void OpenReportsMenu()
     {
-        var reportsService = new ReportService(_databaseService);
+        var reportsService = new ReportService(DatabaseService);
         var isRunning = true;
 
         do
@@ -73,7 +73,7 @@ internal static class Program
 
     private static void OpenTimerMenu()
     {
-        var timerService = new TimerService(_databaseService);
+        var timerService = new TimerService(DatabaseService);
         var isRunning = true;
 
         do

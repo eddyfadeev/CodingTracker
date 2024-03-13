@@ -5,7 +5,7 @@ namespace CodingTracker.utils;
 
 public static class Validation
 {
-    public sealed class ExitToMainMenuException(string message = "\nExiting to main menu.") : Exception(message);
+    public sealed class ReturnBackException(string message = "\nExiting to main menu.") : Exception(message);
     
     internal static DateTime ValidateDate(string message = "Enter the date in the format: dd-mm-yy hh:mm (24h clock).")
     {
@@ -24,7 +24,7 @@ public static class Validation
                 }
 
             }
-            catch (ExitToMainMenuException e)
+            catch (ReturnBackException e)
             {
                 AnsiConsole.WriteLine(e.Message);
                 throw;
@@ -58,17 +58,9 @@ public static class Validation
         {
             var input = AnsiConsole.Ask<string>(message);
 
-            try
+            if (!string.IsNullOrWhiteSpace(input))
             {
-                if (!string.IsNullOrWhiteSpace(input))
-                {
-                    CheckForZero(input);
-                }
-            }
-            catch (ExitToMainMenuException e)
-            {
-                AnsiConsole.WriteLine(e.Message);
-                throw;
+                CheckForZero(input);
             }
             
             isValid = uint.TryParse(input, out number) && number <= topLimit && number >= bottomLimit;
@@ -87,7 +79,7 @@ public static class Validation
     {
         if (input.Equals("0"))
         {
-            throw new ExitToMainMenuException();
+            throw new ReturnBackException();
         }
     }
 }

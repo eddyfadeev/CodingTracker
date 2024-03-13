@@ -1,6 +1,6 @@
-﻿using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using CodingTracker.models;
+using Force.DeepCloner;
 using Spectre.Console;
 
 namespace CodingTracker.views;
@@ -8,20 +8,33 @@ namespace CodingTracker.views;
 public class SummaryConstructor
 {
     internal Table SummaryTable = new();
+    internal Table SummaryTableForSaving = new();
     private TimeSpan _totalDuration;
+    internal string FormattedDuration = "";
     
-    internal void PopulateWithRecords(IEnumerable<CodingSession> sessions)
+    internal void PopulateWithRecords(IEnumerable<CodingSession> sessions, bool formatForSaving = false)
     {
         Table table = new()
         {
             Title = new TableTitle("Coding Sessions", new Style(Color.Grey100)),
             Border = TableBorder.Rounded,
-            BorderStyle = new Style(Color.SpringGreen3),
+            BorderStyle = new Style(Color.SpringGreen3)
         };
+
         table.AddColumn("Id");
         table.AddColumn("Start Date");
         table.AddColumn("End Date");
         table.AddColumn("Duration (hh:mm)");
+
+        var tableForSaving = table.DeepClone();
+        
+        tableForSaving.Title = null;
+        tableForSaving.BorderStyle = null;
+        tableForSaving.HideFooters();
+        tableForSaving.Columns[0].Width = 5;
+        tableForSaving.Columns[1].Width = 24;
+        tableForSaving.Columns[2].Width = 24;
+        tableForSaving.Columns[3].Width = 16;
         
         int counter = 1;
         foreach (var session in sessions)
@@ -35,37 +48,46 @@ public class SummaryConstructor
 
             table.AddRow(
                 new Markup($"[{color}]{session.Id}[/]"),
-                new Markup($"[{color}]{session.StartTime:dd-MM-yyyy HH:mm}[/]"),
-                new Markup($"[{color}]{session.EndTime:dd-MM-yyyy HH:mm}[/]"),
-                new Markup($"[{color}]{session.Duration:g}[/]")
+                new Markup($"[{color}]{session.StartTime:dd-MM-yyyy HH:mm:ss}[/]"),
+                new Markup($"[{color}]{session.EndTime:dd-MM-yyyy HH:mm:ss}[/]"),
+                new Markup($"[{color}]{session.Duration.Hours:D2}:{session.Duration.Minutes:D2}[/]")
+                );
+            tableForSaving.AddRow(
+                $"{session.Id}",
+                $"{session.StartTime:dd-MM-yyyy HH:mm:ss}",
+                $"{session.EndTime:dd-MM-yyyy HH:mm:ss}",
+                $"{session.Duration.Hours:D2}:{session.Duration.Minutes:D2}"
                 );
             counter++;
 
             _totalDuration += session.Duration;
         }
 
-        table.Caption = new TableTitle(
-            "Total Duration: " + FormatDuration(),
-            new Style(Color.Green)
-            );
+        FormatDuration();
+
+        table.Caption = new TableTitle(FormattedDuration, new Style(Color.Green));
         
+        SummaryTableForSaving = tableForSaving;
         SummaryTable = table;
     }
     
-    private string FormatDuration()
+    private void FormatDuration()
     {
         var stringBuilder = new StringBuilder();
         
         string FormatUnit(string unit, int value) => value == 1 ? unit : unit + "s";
 
-        return stringBuilder
+        stringBuilder
+            .Append("Total Duration: ")
             .Append(
-                (_totalDuration.Days > 0 ? 
-                _totalDuration.Days + " " + FormatUnit("day", _totalDuration.Days) + ", " : 
-                "")
-                )
+                (_totalDuration.Days > 0
+                    ? _totalDuration.Days + " " + FormatUnit("day", _totalDuration.Days) + ", "
+                    : "")
+            )
             .Append(_totalDuration.Hours + " " + FormatUnit("hour", _totalDuration.Hours) + ", ")
-            .Append(_totalDuration.Minutes + " " + FormatUnit("minute", _totalDuration.Minutes))
-            .ToString();
+            .Append(_totalDuration.Minutes + " " + FormatUnit("minute", _totalDuration.Minutes)
+            );
+
+        FormattedDuration = stringBuilder.ToString();
     }
 }

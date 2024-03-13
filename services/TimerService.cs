@@ -15,6 +15,7 @@ internal class TimerService
     internal TimerService(DatabaseService databaseService)
     {
         _databaseService = databaseService;
+        _summaryPanel = new Panel("");
         
         _codingSession = _databaseService.GetLastRecord();
         GenerateSummary();
@@ -44,7 +45,7 @@ internal class TimerService
 
         while (Console.ReadKey().Key != ConsoleKey.Enter)
         {
-            // do nothing
+            // do nothing, wait for Enter keypress
         }
         
         isRunning = false;

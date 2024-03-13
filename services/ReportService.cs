@@ -7,139 +7,154 @@ using Spectre.Console;
 
 namespace CodingTracker.services;
 
-internal class ReportService(DatabaseService databaseService)
+internal class ReportService
 {
-    private readonly DatabaseService _databaseService = databaseService;
-    private Table? _report;
+    private readonly DatabaseService _databaseService;
+    private Table _report;
+    private Table _reportForSaving;
+    private string _formattedDuration;
     private readonly uint _monthLimit = 12;
     private readonly uint _yearTopLimit = uint.Parse(DateTime.Today.Year.ToString());
     private readonly uint _yearBottomLimit = uint.Parse(DateTime.Today.Year.ToString()) - 10;
-    private readonly int _todayYear = int.Parse(DateTime.Today.Year.ToString());
-    private readonly int _todayMonth = int.Parse(DateTime.Today.Month.ToString());
+    
+    internal ReportService(DatabaseService databaseService)
+    {
+        _databaseService = databaseService;
+        _formattedDuration = string.Empty;
+        _report = new Table();
+        _reportForSaving = new Table();
+    }
 
     internal void DateToToday()
     {
-        CreateReport(singleDate:true);
+        bool result;
         
-        AnsiConsole.Write(_report!);
+        try
+        {
+            result = CreateReport(singleDate:true);
+        }
+        catch (ReturnBackException)
+        {
+            ContinueMessage();
+            return;
+        }
+        
+        if (result)
+        {
+            AnsiConsole.Write(_report);
+            SavePrompt();
+        }
+        
         ContinueMessage();
     }
 
     internal void DateRange()
     {
-        CreateReport(singleDate:false);
+        bool result;
         
-        AnsiConsole.Write(_report!);
+        try
+        {
+            result = CreateReport(singleDate:false);
+        }
+        catch (ReturnBackException)
+        {
+            ContinueMessage();
+            return;
+        }
+        
+        if (result)
+        {
+            AnsiConsole.Write(_report);
+            SavePrompt();
+        }
+        
         ContinueMessage();
     }
 
     internal void Total()
     {
         var controller = new CodingController(_databaseService);
-        _report = controller.ViewRecords();
+        
+        var report = controller.PrepareRecords();
 
-        if (_report is null)
+        if (report.summaryForRender is null || report.summaryForSave is null)
         {
             return;
         }
         
+        _report = report.summaryForRender;
+        _reportForSaving = report.summaryForSave;
+        
         AnsiConsole.Write(_report);
-        SavePrompt(_report);
+        SavePrompt();
         ContinueMessage();
     }
 
     internal void TotalForMonth()
     {
-        int month = _todayMonth;
-        int year = _todayYear;
-        
+        int month;
+        int year;
         try
         {
-            month = (int) ValidateNumber("Enter the month number.", _monthLimit);
+            month = (int) ValidateNumber("Enter the month number (1-12).", _monthLimit);
             year = GetCorrectYear();
         } 
-        catch (ExitToMainMenuException e)
+        catch (ReturnBackException)
         {
-            AnsiConsole.WriteLine(e.Message);
             ContinueMessage();
+            return;
         }
         
-        CreateReport(
+        var result = CreateReport(
             singleDate:false,
             startDate: new DateTime(year: year, month: month, day: 01),
             endDate: new DateTime(year: year, month: month, day: DateTime.DaysInMonth(year, month))
             );
-        
-        if (_report is null)
+
+        if (result)
         {
-            return;
+            AnsiConsole.Write(_report);
+            SavePrompt();
         }
         
-        AnsiConsole.Write(_report);
         ContinueMessage();
     }
 
     internal void TotalForYear()
     {
-        int year = _todayYear;
+        int year;
         
         try
         {
             year = GetCorrectYear();
         }
-        catch (ExitToMainMenuException e)
+        catch (ReturnBackException)
         {
-            AnsiConsole.WriteLine(e.Message);
             ContinueMessage();
+            return;
         }
         
-        CreateReport(
+        var result = CreateReport(
             singleDate:false,
             startDate: new DateTime(year: year, month: 01, day: 01),
             endDate: new DateTime(year: year, month: 12, day: DateTime.DaysInMonth(year, 12))
             );
-
-        if (_report is null)
+        
+        if (result)
         {
-            return;
+            AnsiConsole.Write(_report);
+            SavePrompt();
         }
         
-        AnsiConsole.Write(_report);
         ContinueMessage();
     }
     
-    private void CreateReport(bool singleDate, DateTime? startDate = null, DateTime? endDate = null)
+    private bool CreateReport(bool singleDate, DateTime? startDate = null, DateTime? endDate = null)
     {
         var tableConstructor = new SummaryConstructor();
-        UserInput userInput = new();
-        DateTime[] dates;
-
-        if (startDate is not null && endDate is not null && !singleDate)
-        {
-            dates =
-            [
-                startDate.Value, 
-                endDate.Value
-            ];
-        }
-        else if (startDate is not null && !singleDate)
-        {
-            dates = 
-            [
-                endDate.Value,
-                userInput.GetDateInputs(singleDate: true)[0]
-            ];
-        }
-        else if (startDate is null && singleDate)
-        {
-            dates = userInput.GetDateInputs(singleDate: true);
-        }
-        else
-        {
-            dates = singleDate 
-                ? userInput.GetDateInputs(singleDate:true) 
-                : userInput.GetDateInputs();
-        }
+        DateTime[]? dates;
+        
+        dates = ProcessDates(singleDate, startDate, endDate);
         
         var records = _databaseService.GetCodingSessionsByDate(dates[0], dates[1]);
 
@@ -147,26 +162,29 @@ internal class ReportService(DatabaseService databaseService)
         
         if (codingSessions.Count == 0)
         {
-            ContinueMessage();
-            return;
+            return false;
         }
         
         tableConstructor.PopulateWithRecords(codingSessions);
-
+        
+        _formattedDuration = tableConstructor.FormattedDuration;
+        _reportForSaving = tableConstructor.SummaryTableForSaving;
         _report = tableConstructor.SummaryTable;
+        
+        return true;
     }
 
-    private void SavePrompt(Table table)
+    private void SavePrompt()
     {
-        var wantToSave = AnsiConsole.Confirm("Would you like to save this report?");
+        var wantsToSave = AnsiConsole.Confirm("\nWould you like to save this report?");
 
-        if (wantToSave)
+        if (wantsToSave)
         {
-            SaveReport(table);
+            SaveReport();
         }
     }
     
-    private void SaveReport(Table table)
+    private void SaveReport()
     {
         var actualTime = DateTime.Now
             .ToString("HH:mm:ss")
@@ -179,23 +197,60 @@ internal class ReportService(DatabaseService databaseService)
             Out = new AnsiConsoleOutput(textWriter)
         });
         
-        console.Write(table);
-        console.Write($"Coding Tracker Report. Generated on {DateTime.Now:f}");
+        console.Write(_reportForSaving);
+        console.Write($"Coding Tracker Report. Generated on {DateTime.Now:f}\n");
+        console.Write(_formattedDuration);
         
-        File.WriteAllText($"report-{DateTime.Now.Date:dd-MM-yyyy}-{actualTime}.txt", textWriter.ToString());
+        File.WriteAllText($"report-{DateTime.Now.Date:dd-MM-yyyy}-{actualTime}.csv", textWriter.ToString());
 
         AnsiConsole.Console = AnsiConsole.Create(new AnsiConsoleSettings());
         
-        AnsiConsole.WriteLine("Save complete.");
-        ContinueMessage();
+        AnsiConsole.MarkupLine("\n[green]Save compete[/]");
     }
     
     private int GetCorrectYear()
     {
         return (int)ValidateNumber(
-            message:"Enter the year.", 
+            message:"Enter the year (yyyy).", 
             topLimit:_yearTopLimit, 
             bottomLimit:_yearBottomLimit
         );
+    }
+
+    private DateTime[] ProcessDates(bool singleDate, DateTime? startDate, DateTime? endDate)
+    {
+        UserInput userInput = new();
+        DateTime[] processedDates;
+
+        switch (singleDate)
+        {
+            case true when startDate is null:
+                processedDates =
+                [
+                    userInput.GetDateInputs(singleDate: true)[0],
+                    DateTime.Now, 
+                ];
+                break;
+            case false when startDate is null && endDate is null:
+                processedDates = userInput.GetDateInputs();
+                break;
+            case false when startDate is null || endDate is null:
+                processedDates =
+                [
+                    startDate ?? userInput.GetDateInputs(singleDate:true)[0],
+                    endDate ?? userInput.GetDateInputs(singleDate:true)[0]
+                ];
+                break;
+            default:
+                endDate ??= DateTime.Now; 
+                processedDates = 
+                [
+                    startDate.Value,
+                    endDate.Value
+                ];
+                break;
+        }
+        
+        return processedDates;
     }
 }
