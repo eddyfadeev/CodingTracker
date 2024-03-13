@@ -27,9 +27,11 @@ internal class ReportService
 
     internal void DateToToday()
     {
+        bool result;
+        
         try
         {
-            CreateReport(singleDate:true);
+            result = CreateReport(singleDate:true);
         }
         catch (ReturnBackException)
         {
@@ -37,16 +39,22 @@ internal class ReportService
             return;
         }
         
-        AnsiConsole.Write(_report);
-        SavePrompt();
+        if (result)
+        {
+            AnsiConsole.Write(_report);
+            SavePrompt();
+        }
+        
         ContinueMessage();
     }
 
     internal void DateRange()
     {
+        bool result;
+        
         try
         {
-            CreateReport(singleDate:false);
+            result = CreateReport(singleDate:false);
         }
         catch (ReturnBackException)
         {
@@ -54,8 +62,12 @@ internal class ReportService
             return;
         }
         
-        AnsiConsole.Write(_report);
-        SavePrompt();
+        if (result)
+        {
+            AnsiConsole.Write(_report);
+            SavePrompt();
+        }
+        
         ContinueMessage();
     }
 
