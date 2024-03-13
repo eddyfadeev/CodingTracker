@@ -34,19 +34,19 @@ public static class Utilities
     
     internal static void ContinueMessage()
     {
-        AnsiConsole.WriteLine("Press any key to continue...\n");
+        AnsiConsole.WriteLine("\nPress any key to continue...\n");
         Console.ReadKey();
     }
 
-    internal static List<CodingSession> CheckForAnyRecord(IEnumerable<CodingSession> records)
+    internal static List<CodingSession> CheckForAnyRecord(IEnumerable<CodingSession>? records)
     {
-        if (records is null)
+        var recordsList = records is not null ? records.ToList() : new List<CodingSession>();
+        
+        if (recordsList.Count == 0)
         {
             AnsiConsole.WriteLine("No records found.");
-            
-            return new List<CodingSession>();
         }
 
-        return records.ToList();
+        return recordsList;
     }
 }

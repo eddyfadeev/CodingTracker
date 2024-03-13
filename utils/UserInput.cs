@@ -7,18 +7,18 @@ public class UserInput
 {
     internal DateTime[] GetDateInputs(bool singleDate = false)
     {
-        AnsiConsole.WriteLine("Please enter a start date.");
+        AnsiConsole.WriteLine(singleDate ? "Enter the date." : "Enter the start date.");
         var startDate = ValidateDate();
-        
+
         if (singleDate)
         {
             return [startDate];
         }
-        
-        AnsiConsole.WriteLine("Please enter an end date.");
+
+        AnsiConsole.WriteLine("Enter the end date.");
         var endDate = ValidateDate();
 
-        while (startDate > endDate) 
+        while (startDate > endDate)
         {
             AnsiConsole.WriteLine("The end date must be after the start date.");
             endDate = ValidateDate();

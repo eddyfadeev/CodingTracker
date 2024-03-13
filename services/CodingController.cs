@@ -16,13 +16,27 @@ internal class CodingController(DatabaseService databaseService)
 {
     private readonly DatabaseService _databaseService = databaseService;
 
+    internal void ViewRecords()
+    {
+        AnsiConsole.Write(PrepareRecords().summaryForRender);
+        ContinueMessage();
+    }
+
     internal void AddRecord()
     {
         CodingSession session = new();
         UserInput userInput = new();
+        DateTime[] dates;
 
-        var dates = userInput.GetDateInputs();
-        
+        try
+        {
+            dates = userInput.GetDateInputs();
+        }
+        catch (ReturnBackException)
+        {
+            ContinueMessage();
+            return;
+        }
         
         session.StartTime = dates[0];
         session.EndTime = dates[1];
@@ -30,7 +44,7 @@ internal class CodingController(DatabaseService databaseService)
         _databaseService.InsertRecord(session);
     }
     
-    internal Table? ViewRecords()
+    internal (Table? summaryForRender, Table? summaryForSave) PrepareRecords()
     {
         var tableConstructor = new SummaryConstructor();
         var records = _databaseService.GetAllCodingSessions();
@@ -38,29 +52,35 @@ internal class CodingController(DatabaseService databaseService)
         if (records is null)
         {
             AnsiConsole.WriteLine("No records found.");
-            return null;
+            ContinueMessage();
+            
+            return (null, null);
         }
-        else
-        {
-            var codingSessions = records.ToList();
-            tableConstructor.PopulateWithRecords(codingSessions);
-        
-            AnsiConsole.Write(tableConstructor.SummaryTable);
-        }
-        
-        ContinueMessage();
 
-        return tableConstructor.SummaryTable;
+        var codingSessions = records.ToList();
+        tableConstructor.PopulateWithRecords(codingSessions);
+
+        return (tableConstructor.SummaryTable, tableConstructor.SummaryTableForSaving);
     }
     
     internal void DeleteRecord()
     {
+        int id;
         var userInput = new UserInput();
         
-        ViewRecords();
-
-        var id = userInput.GetIdInput();
-
+        AnsiConsole.Write(PrepareRecords().summaryForRender);
+        
+        try
+        {
+            id = userInput.GetIdInput();
+        }
+        catch (ReturnBackException e)
+        {
+            AnsiConsole.WriteLine(e.Message);
+            ContinueMessage();
+            return;
+        }
+        
         if (!AnsiConsole.Confirm("Are you sure?"))
         {
             return;
@@ -78,8 +98,9 @@ internal class CodingController(DatabaseService databaseService)
     internal void UpdateRecord()
     {
         var userInput = new UserInput();
-        CodingSession session;
         DateTime[] dates;
+        int id;
+        CodingSession session;
         
         var sessions = _databaseService.GetAllCodingSessions();
         
@@ -90,25 +111,26 @@ internal class CodingController(DatabaseService databaseService)
             return;
         }
         
+        AnsiConsole.Write(PrepareRecords().summaryForRender);
+
         try
         {
-            var id = userInput.GetIdInput();
-            
+            id = userInput.GetIdInput();
             session = sessions.Single(x => x.Id == id);
-            
             dates = userInput.GetDateInputs();
         }
-        catch (InvalidOperationException)
+        catch (ReturnBackException e)
         {
-            AnsiConsole.WriteLine("No record with that ID exists.");
+            AnsiConsole.WriteLine(e.Message);
             ContinueMessage();
 
             return;
         }
-        catch (ExitToMainMenuException)
+        catch (InvalidOperationException)
         {
+            AnsiConsole.WriteLine("\nNo record with that ID exists.");
             ContinueMessage();
-            
+
             return;
         }
         
@@ -116,5 +138,8 @@ internal class CodingController(DatabaseService databaseService)
         session.EndTime = dates[1];
         
         _databaseService.UpdateRecord(session);
+        
+        AnsiConsole.WriteLine("Record deleted successfully.");
+        ContinueMessage();
     }
 }

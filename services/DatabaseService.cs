@@ -131,7 +131,7 @@ internal partial class DatabaseService
         return connection.Execute(query, new { Id = recordId });
     }
     
-    internal CodingSession GetLastRecord()
+    internal CodingSession? GetLastRecord()
     {
         using var connection = GetConnection();
         

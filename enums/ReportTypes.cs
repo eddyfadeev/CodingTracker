@@ -1,22 +1,23 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using static CodingTracker.enums.EnumHelpers;
 
 namespace CodingTracker.enums;
 
 internal enum ReportTypes
 {
-    [Display(Name = "Date to Today"), EnumHelpers.Method("DateToToday")]
+    [Display(Name = "Date to Today"), Method("DateToToday")]
     DateToToday,
     
-    [Display(Name = "Date Range"), EnumHelpers.Method("DateRange")]
+    [Display(Name = "Date Range"), Method("DateRange")]
     DateRange,
     
-    [Display(Name = "Total"), EnumHelpers.Method("Total")]
+    [Display(Name = "Total"), Method("Total")]
     Total,
     
-    [Display(Name = "Total for Month"), EnumHelpers.Method("TotalForMonth")]
+    [Display(Name = "Total for Month"), Method("TotalForMonth")]
     TotalForMonth,
     
-    [Display(Name = "Total for Year"), EnumHelpers.Method("TotalForYear")]
+    [Display(Name = "Total for Year"), Method("TotalForYear")]
     TotalForYear,
     
     [Display(Name = "Return to Main Menu")]
