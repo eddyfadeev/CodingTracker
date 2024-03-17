@@ -1,11 +1,15 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using CodingTracker.enums;
 using CodingTracker.models;
 using Spectre.Console;
 using static CodingTracker.utils.Utilities;
 
 namespace CodingTracker.services;
 
+/// <summary>
+/// The TimerService class handles the timer functionality and manages coding sessions.
+/// </summary>
 internal class TimerService
 {
     private readonly DatabaseService _databaseService;
@@ -20,7 +24,7 @@ internal class TimerService
         _codingSession = _databaseService.GetLastRecord();
         GenerateSummary();
     }
-
+    
     internal void StartTimer()
     {
         DateTime startTime, endTime;
@@ -76,7 +80,7 @@ internal class TimerService
         AnsiConsole.Write(_summaryPanel);
         SavePrompt();
     }
-
+    
     private void GenerateSummary()
     {
         var summaryPanel = new Panel(GenerateSummaryText())
@@ -95,7 +99,7 @@ internal class TimerService
     {
         var stringBuilder = new StringBuilder();
 
-        stringBuilder.Append($"Date of the session: {_codingSession.StartTime:dd-MM-yyyy}\n");
+        stringBuilder.Append($"Date of the session: {_codingSession!.StartTime:dd-MM-yyyy}\n");
         stringBuilder.Append($"This session was going from {_codingSession.StartTime:HH:mm:ss} to {_codingSession.EndTime:HH:mm:ss}\n");
         stringBuilder.Append("Total time spent: ");
         
@@ -113,7 +117,7 @@ internal class TimerService
         
         return summaryText;
     }
-    
+
     private void SavePrompt()
     {
         var wantToSave = AnsiConsole.Confirm("Would you like to save this summary?");
@@ -123,7 +127,10 @@ internal class TimerService
             return;
         }
         
-        var result = _databaseService.InsertRecord(_codingSession);
+        var result = _databaseService.UpdateData(
+            action:DatabaseUpdateActions.Insert,
+            session:_codingSession
+            );
 
         AnsiConsole.MarkupLine(result > 0
             ? "[green]Summary saved successfully![/]"

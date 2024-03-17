@@ -1,6 +1,7 @@
 ﻿using CodingTracker.enums;
 using CodingTracker.services;
 using CodingTracker.views;
+using Microsoft.Data.Sqlite;
 using Spectre.Console;
 
 namespace CodingTracker;
@@ -25,28 +26,35 @@ internal static class Program
 
         do
         {
-            var userChoice = MenuView.ShowMainMenu();
-            
-            if (userChoice == MainMenuEntries.Quit)
+            try
             {
-                isRunning = false;
-                AnsiConsole.WriteLine("Goodbye!");
-                
-                continue;
-            }
+                var userChoice = MenuView.ShowMainMenu();
 
-            if (userChoice == MainMenuEntries.Reports)
-            {
-                OpenReportsMenu();
-                continue;
-            }
+                if (userChoice == MainMenuEntries.Quit)
+                {
+                    isRunning = false;
+                    AnsiConsole.WriteLine("Goodbye!");
 
-            if (userChoice == MainMenuEntries.Timer)
-            {
-                OpenTimerMenu();
+                    continue;
+                }
+
+                if (userChoice == MainMenuEntries.Reports)
+                {
+                    OpenReportsMenu();
+                    continue;
+                }
+
+                if (userChoice == MainMenuEntries.Timer)
+                {
+                    OpenTimerMenu();
+                }
+
+                ServiceHelpers.InvokeActionForMenuEntry(userChoice, controller);
             }
-            
-            ServiceHelpers.InvokeActionForMenuEntry(userChoice, controller);
+            catch (SqliteException)
+            {
+                AnsiConsole.WriteLine("Problem with the database. Please try again or restart the app.");
+            }
             
         } while(isRunning);
     }
@@ -66,7 +74,7 @@ internal static class Program
                 continue;
             }
             
-            ServiceHelpers.InvokeActionForMenuEntry(userChoice, reportsService);
+            reportsService.HandleUserChoice(userChoice);
             
         } while (isRunning);
     }

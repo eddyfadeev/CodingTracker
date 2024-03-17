@@ -1,4 +1,5 @@
-﻿using static CodingTracker.utils.Validation;
+﻿﻿using CodingTracker.enums;
+ using static CodingTracker.utils.Validation;
 using static CodingTracker.utils.Utilities;
 
 using CodingTracker.models;
@@ -18,7 +19,15 @@ internal class CodingController(DatabaseService databaseService)
 
     internal void ViewRecords()
     {
-        AnsiConsole.Write(PrepareRecords().summaryForRender);
+        try
+        {
+            AnsiConsole.Write(PrepareRecords().summaryForRender);
+        }
+        catch (ArgumentNullException)
+        {
+            return;
+        }
+        
         ContinueMessage();
     }
 
@@ -34,33 +43,13 @@ internal class CodingController(DatabaseService databaseService)
         }
         catch (ReturnBackException)
         {
-            ContinueMessage();
             return;
         }
         
         session.StartTime = dates[0];
         session.EndTime = dates[1];
         
-        _databaseService.InsertRecord(session);
-    }
-    
-    internal (Table? summaryForRender, Table? summaryForSave) PrepareRecords()
-    {
-        var tableConstructor = new SummaryConstructor();
-        var records = _databaseService.GetAllCodingSessions();
-        
-        if (records is null)
-        {
-            AnsiConsole.WriteLine("No records found.");
-            ContinueMessage();
-            
-            return (null, null);
-        }
-
-        var codingSessions = records.ToList();
-        tableConstructor.PopulateWithRecords(codingSessions);
-
-        return (tableConstructor.SummaryTable, tableConstructor.SummaryTableForSaving);
+        _databaseService.UpdateData(DatabaseUpdateActions.Insert, session);
     }
     
     internal void DeleteRecord()
@@ -68,16 +57,17 @@ internal class CodingController(DatabaseService databaseService)
         int id;
         var userInput = new UserInput();
         
-        AnsiConsole.Write(PrepareRecords().summaryForRender);
-        
         try
         {
+            AnsiConsole.Write(PrepareRecords().summaryForRender);
             id = userInput.GetIdInput();
         }
-        catch (ReturnBackException e)
+        catch (ReturnBackException)
         {
-            AnsiConsole.WriteLine(e.Message);
-            ContinueMessage();
+            return;
+        }
+        catch (ArgumentNullException)
+        {
             return;
         }
         
@@ -86,7 +76,10 @@ internal class CodingController(DatabaseService databaseService)
             return;
         }
 
-        var response = _databaseService.DeleteRecord(id);
+        var response = _databaseService.UpdateData(
+            action:DatabaseUpdateActions.Delete, 
+            recordId:id
+            );
         
         var responseMessage = response < 1 ? "No record with that ID exists." : "Record deleted successfully.";
         
@@ -102,7 +95,7 @@ internal class CodingController(DatabaseService databaseService)
         int id;
         CodingSession session;
         
-        var sessions = _databaseService.GetAllCodingSessions();
+        var sessions = _databaseService.RetrieveCodingSessions(null, null);
         
         if (sessions is null)
         {
@@ -111,19 +104,16 @@ internal class CodingController(DatabaseService databaseService)
             return;
         }
         
-        AnsiConsole.Write(PrepareRecords().summaryForRender);
-
         try
         {
+            PrepareRecords();
+            
             id = userInput.GetIdInput();
             session = sessions.Single(x => x.Id == id);
             dates = userInput.GetDateInputs();
         }
-        catch (ReturnBackException e)
+        catch (ReturnBackException)
         {
-            AnsiConsole.WriteLine(e.Message);
-            ContinueMessage();
-
             return;
         }
         catch (InvalidOperationException)
@@ -133,13 +123,43 @@ internal class CodingController(DatabaseService databaseService)
 
             return;
         }
+        catch (ArgumentNullException)
+        {
+            return;
+        }
         
         session.StartTime = dates[0];
         session.EndTime = dates[1];
         
-        _databaseService.UpdateRecord(session);
+        _databaseService.UpdateData(
+            action:DatabaseUpdateActions.Update, 
+            session:session
+            );
         
         AnsiConsole.WriteLine("Record deleted successfully.");
         ContinueMessage();
+    }
+    
+    internal (Table summaryForRender, Table summaryForSave, string formattedDuration) PrepareRecords()
+    {
+        var tableConstructor = new SummaryConstructor();
+        var records = _databaseService.RetrieveCodingSessions(null, null);
+        
+        if (records is null)
+        {
+            AnsiConsole.WriteLine("No records found.");
+            ContinueMessage();
+            
+            throw new ArgumentNullException();
+        }
+
+        var codingSessions = records.ToList();
+        tableConstructor.PopulateWithRecords(codingSessions);
+
+        return (
+            tableConstructor.SummaryTable, 
+            tableConstructor.SummaryTableForSaving, 
+            tableConstructor.FormattedDuration
+        );
     }
 }
