@@ -11,7 +11,7 @@ public static class Validation
     /// <summary>
     /// Represents an exception that is thrown when the user wants to return back to the main menu.
     /// </summary>
-    public sealed class ReturnBackException(string message = "\nExiting to main menu.") : Exception(message);
+    public sealed class ReturnBackException(string message = "\nExiting to menu.") : Exception(message);
 
     /// <summary>
     /// Validates a date input provided by the user.

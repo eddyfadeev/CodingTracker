@@ -17,7 +17,7 @@ internal abstract class ServiceHelpers
     internal static void InvokeActionForMenuEntry(Enum entry, object actionInstance)
     {
         var entryFieldInfo = entry.GetType().GetField(entry.ToString());
-        var methodAttribute = entryFieldInfo.GetCustomAttribute<EnumHelpers.MethodAttribute>();
+        var methodAttribute = entryFieldInfo!.GetCustomAttribute<EnumHelpers.MethodAttribute>();
 
         if (methodAttribute != null)
         {

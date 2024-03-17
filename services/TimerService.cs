@@ -99,7 +99,7 @@ internal class TimerService
     {
         var stringBuilder = new StringBuilder();
 
-        stringBuilder.Append($"Date of the session: {_codingSession.StartTime:dd-MM-yyyy}\n");
+        stringBuilder.Append($"Date of the session: {_codingSession!.StartTime:dd-MM-yyyy}\n");
         stringBuilder.Append($"This session was going from {_codingSession.StartTime:HH:mm:ss} to {_codingSession.EndTime:HH:mm:ss}\n");
         stringBuilder.Append("Total time spent: ");
         

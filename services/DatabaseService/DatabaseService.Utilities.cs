@@ -44,7 +44,7 @@ internal partial class DatabaseService
 
         stringBuilder
             .Append(" WHERE ")
-            .Append(start is not null ? "StartTime >= @Start" : "");
+            .Append(start is not null ? "StartTime >= @Start " : "");
 
         stringBuilder
             .Append(start is not null && end is not null ? "AND EndTime <= @End" : "EndTime <= @End");

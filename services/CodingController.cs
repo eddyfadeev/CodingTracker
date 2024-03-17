@@ -1,5 +1,5 @@
-﻿using CodingTracker.enums;
-using static CodingTracker.utils.Validation;
+﻿﻿using CodingTracker.enums;
+ using static CodingTracker.utils.Validation;
 using static CodingTracker.utils.Utilities;
 
 using CodingTracker.models;
@@ -17,18 +17,20 @@ internal class CodingController(DatabaseService databaseService)
 {
     private readonly DatabaseService _databaseService = databaseService;
 
-    /// <summary>
-    /// Displays the records of coding sessions in the console.
-    /// </summary>
     internal void ViewRecords()
     {
-        AnsiConsole.Write(PrepareRecords().summaryForRender);
+        try
+        {
+            AnsiConsole.Write(PrepareRecords().summaryForRender);
+        }
+        catch (ArgumentNullException)
+        {
+            return;
+        }
+        
         ContinueMessage();
     }
 
-    /// <summary>
-    /// Adds a record to the database based on the user's input for a coding session.
-    /// </summary>
     internal void AddRecord()
     {
         CodingSession session = new();
@@ -41,63 +43,31 @@ internal class CodingController(DatabaseService databaseService)
         }
         catch (ReturnBackException)
         {
-            ContinueMessage();
             return;
         }
         
         session.StartTime = dates[0];
         session.EndTime = dates[1];
         
-        _databaseService.UpdateData(
-            action:DatabaseUpdateActions.Insert,
-            session:session
-            );
+        _databaseService.UpdateData(DatabaseUpdateActions.Insert, session);
     }
-
-    /// <summary>
-    /// Prepares and retrieves coding session records for display or saving.
-    /// </summary>
-    /// <returns>
-    /// A tuple containing the summary table for display purposes and the summary table for saving purposes.
-    /// If no records are found, both tables will be null.
-    /// </returns>
-    internal (Table? summaryForRender, Table? summaryForSave) PrepareRecords()
-    {
-        var tableConstructor = new SummaryConstructor();
-        var records = _databaseService.RetrieveCodingSessions(null, null);
-        
-        if (records is null)
-        {
-            AnsiConsole.WriteLine("No records found.");
-            ContinueMessage();
-            
-            return (null, null);
-        }
-
-        var codingSessions = records.ToList();
-        tableConstructor.PopulateWithRecords(codingSessions);
-
-        return (tableConstructor.SummaryTable, tableConstructor.SummaryTableForSaving);
-    }
-
-    /// <summary>
-    /// Deletes a record from the database based on the provided record ID.
-    /// </summary>
+    
     internal void DeleteRecord()
     {
         int id;
         var userInput = new UserInput();
         
-        AnsiConsole.Write(PrepareRecords().summaryForRender);
-        
         try
         {
+            AnsiConsole.Write(PrepareRecords().summaryForRender);
             id = userInput.GetIdInput();
         }
-        catch (ReturnBackException e)
+        catch (ReturnBackException)
         {
-            AnsiConsole.WriteLine(e.Message);
-            ContinueMessage();
+            return;
+        }
+        catch (ArgumentNullException)
+        {
             return;
         }
         
@@ -117,10 +87,7 @@ internal class CodingController(DatabaseService databaseService)
         
         ContinueMessage();
     }
-
-    /// <summary>
-    /// Updates a record in the database with the specified ID by modifying the start and end times of a coding session.
-    /// </summary>
+    
     internal void UpdateRecord()
     {
         var userInput = new UserInput();
@@ -137,19 +104,16 @@ internal class CodingController(DatabaseService databaseService)
             return;
         }
         
-        AnsiConsole.Write(PrepareRecords().summaryForRender);
-
         try
         {
+            PrepareRecords();
+            
             id = userInput.GetIdInput();
             session = sessions.Single(x => x.Id == id);
             dates = userInput.GetDateInputs();
         }
-        catch (ReturnBackException e)
+        catch (ReturnBackException)
         {
-            AnsiConsole.WriteLine(e.Message);
-            ContinueMessage();
-
             return;
         }
         catch (InvalidOperationException)
@@ -157,6 +121,10 @@ internal class CodingController(DatabaseService databaseService)
             AnsiConsole.WriteLine("\nNo record with that ID exists.");
             ContinueMessage();
 
+            return;
+        }
+        catch (ArgumentNullException)
+        {
             return;
         }
         
@@ -168,7 +136,30 @@ internal class CodingController(DatabaseService databaseService)
             session:session
             );
         
-        AnsiConsole.WriteLine("Record updated successfully.");
+        AnsiConsole.WriteLine("Record deleted successfully.");
         ContinueMessage();
+    }
+    
+    internal (Table summaryForRender, Table summaryForSave, string formattedDuration) PrepareRecords()
+    {
+        var tableConstructor = new SummaryConstructor();
+        var records = _databaseService.RetrieveCodingSessions(null, null);
+        
+        if (records is null)
+        {
+            AnsiConsole.WriteLine("No records found.");
+            ContinueMessage();
+            
+            throw new ArgumentNullException();
+        }
+
+        var codingSessions = records.ToList();
+        tableConstructor.PopulateWithRecords(codingSessions);
+
+        return (
+            tableConstructor.SummaryTable, 
+            tableConstructor.SummaryTableForSaving, 
+            tableConstructor.FormattedDuration
+        );
     }
 }
